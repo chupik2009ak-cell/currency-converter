@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер валют | Реальные курсы онлайн</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.3s ease;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+        .converter-card {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 2;
+            transition: all 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .converter-card::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .converter-card::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .converter-card::-webkit-scrollbar-thumb {
+            background: #2a5298;
+            border-radius: 10px;
+        }
+
+        /* ========== ТЁМНАЯ ТЕМА ========== */
+        body.dark-mode {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        }
+
+        body.dark-mode .converter-card {
+            background: #1e1e2e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode h1 {
+            color: #bb9aff;
+        }
+
+        body.dark-mode .subtitle {
+            color: #aaa;
+        }
+
+        body.dark-mode label {
+            color: #ddd;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background: #2a2a3a;
+            border-color: #444;
+            color: #fff;
+        }
+
+        body.dark-mode input:focus,
+        body.dark-mode select:focus {
+            border-color: #bb9aff;
+        }
+
+        body.dark-mode button[type="submit"] {
+            background: linear-gradient(135deg, #5a4a8a 0%, #3a2a6a 100%);
+        }
+
+        body.dark-mode .swap-btn button {
+            background: #4a4a6a;
+        }
+
+        body.dark-mode .result {
+            background: linear-gradient(135deg, #2a2a4a20 0%, #3a2a6a20 100%);
+        }
+
+        body.dark-mode .result-text {
+            color: #bb9aff;
+        }
+
+        body.dark-mode .result-label {
+            color: #aaa;
+        }
+
+        body.dark-mode .rate-item {
+            background: #2a2a3a;
+        }
+
+        body.dark-mode .rate-code {
+            color: #bb9aff;
+        }
+
+        body.dark-mode .rate-value {
+            color: #ccc;
+        }
+
+        body.dark-mode .rates-info {
+            border-top-color: #444;
+        }
+
+        body.dark-mode .converter-card::-webkit-scrollbar-track {
+            background: #2a2a3a;
+        }
+        
+        body.dark-mode .converter-card::-webkit-scrollbar-thumb {
+            background: #bb9aff;
+        }
+
+        /* Переключатель темы */
+        .theme-switch {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .theme-switch label {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 30px;
+        }
+
+        body.dark-mode .theme-switch label {
+            background: #2a2a3a;
+        }
+
+        .theme-switch input {
+            width: 40px;
+            cursor: pointer;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+        }
+
+        .swap-btn {
+            text-align: center;
+            margin: 5px 0 15px 0;
+        }
+
+        .swap-btn button {
+            width: auto;
+            padding: 8px 25px;
+            background: #6c757d;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .swap-btn button:hover {
+            transform: scale(1.02);
+            background: #5a6268;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c7210 0%, #2a529810 100%);
+            border-radius: 15px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .rates-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .rates-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .rates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+        }
+
+        .rate-item {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 13px;
+            transition: transform 0.2s;
+        }
+
+        .rate-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .rate-code {
+            font-weight: bold;
+            color: #2a5298;
+            font-size: 14px;
+        }
+
+        .rate-value {
+            color: #555;
+            font-size: 12px;
+        }
+
+        /* Контейнер для падающих монет */
+        .coins-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .coin {
+            position: absolute;
+            top: -50px;
+            font-size: 30px;
+            animation: fall linear infinite;
+            opacity: 0.7;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+        }
+
+        @keyframes fall {
+            0% {
+                top: -50px;
+                transform: rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                top: 100vh;
+                transform: rotate(360deg);
+                opacity: 0.2;
+            }
+        }
+
+        /* Адаптация для телефонов */
+        @media (max-width: 500px) {
+            .converter-card {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .result-text {
+                font-size: 20px;
+            }
+            
+            .rates-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="converter-card">
+        <!-- Переключатель тёмной темы -->
+        <div class="theme-switch">
+            <label>
+                🌙
+                <input type="checkbox" id="themeSwitch">
+                ☀️
+            </label>
+        </div>
+
+        <h1>💱 Конвертер валют</h1>
+        <div class="subtitle">Актуальные курсы онлайн</div>
+
+        <form action="/convert" method="POST">
+            <div class="input-group">
+                <label>💰 Сумма:</label>
+                <input type="number" 
+                       name="amount" 
+                       step="any" 
+                       required 
+                       placeholder="Введите сумму"
+                       value="{{ amount if amount else '' }}">
+            </div>
+
+            <div class="input-group">
+                <label>📤 Из валюты:</label>
+                <select name="from_currency" id="from_currency">
+                    {% for code in rates %}
+                    <option value="{{ code }}" {% if from_cur == code %}selected{% endif %}>
+                        {{ code }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="swap-btn">
+                <button type="button" onclick="swapCurrencies()">🔄 Поменять местами</button>
+            </div>
+
+            <div class="input-group">
+                <label>📥 В валюту:</label>
+                <select name="to_currency" id="to_currency">
+                    {% for code in rates %}
+                    <option value="{{ code }}" {% if to_cur == code %}selected{% endif %}>
+                        {{ code }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Конвертировать 🔄</button>
+        </form>
+
+        {% if result %}
+        <div class="result">
+            <div class="result-text">
+                {{ "%.2f"|format(amount) }} {{ from_cur }} = 
+                {{ "%.2f"|format(result) }} {{ to_cur }}
+            </div>
+            <div class="result-label">
+                По текущему курсу
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="rates-info">
+            <div class="rates-title">📊 Курс к рублю (RUB)</div>
+            <div class="rates-grid">
+                {% for code, rate in rates.items() %}
+                <div class="rate-item">
+                    <div class="rate-code">{{ code }}</div>
+                    <div class="rate-value">{{ "%.4f"|format(rate) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div style="text-align: center; font-size: 11px; color: #999; margin-top: 20px;">
+            Курсы обновляются автоматически
+        </div>
+    </div>
+
+    <!-- Контейнер для падающих монет -->
+    <div class="coins-container" id="coinsContainer"></div>
+
+    <script>
+        // ========== ПАДАЮЩИЕ МОНЕТЫ ==========
+        function createCoin() {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            const coins = ['💰', '💵', '💶', '💷', '🪙', '💴', '💸', '🪙', '💎'];
+            coin.innerHTML = coins[Math.floor(Math.random() * coins.length)];
+            const size = 20 + Math.random() * 35;
+            coin.style.fontSize = size + 'px';
+            coin.style.left = Math.random() * 100 + '%';
+            const duration = 3 + Math.random() * 6;
+            coin.style.animationDuration = duration + 's';
+            coin.style.animationDelay = Math.random() * 5 + 's';
+            document.getElementById('coinsContainer').appendChild(coin);
+            setTimeout(() => { coin.remove(); }, duration * 1000);
+        }
+        
+        setInterval(createCoin, 450);
+        for(let i = 0; i < 15; i++) { setTimeout(createCoin, i * 150); }
+        
+        // ========== СМЕНА ВАЛЮТ МЕСТАМИ ==========
+        function swapCurrencies() {
+            let fromSelect = document.getElementById('from_currency');
+            let toSelect = document.getElementById('to_currency');
+            if (fromSelect && toSelect) {
+                let temp = fromSelect.value;
+                fromSelect.value = toSelect.value;
+                toSelect.value = temp;
+            }
+        }
+        
+        // ========== ТЁМНАЯ ТЕМА ==========
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            const themeSwitch = document.getElementById('themeSwitch');
+            if (themeSwitch) themeSwitch.checked = true;
+        }
+        
+        const themeSwitch = document.getElementById('themeSwitch');
+        if (themeSwitch) {
+            themeSwitch.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
